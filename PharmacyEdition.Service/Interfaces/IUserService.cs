@@ -1,12 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using PharmacyEdition.Service.DTOs;
+using PharmacyEdition.Service.Helpers;
 
-namespace PharmacyEdition.Service.Interfaces
+namespace PharmacyEdition.Service.Interfaces;
+
+public interface IUserService
 {
-    internal interface IUserService
-    {
-    }
+    ValueTask<Response<UserDto>> AddAsync(UserCreationDto model);
+    ValueTask<Response<bool>> DeleteAsync(long id);
+    ValueTask<Response<UserDto>> UpdateAsync(long id, UserCreationDto model);
+    ValueTask<Response<UserDto>> GetByIdAsync(long id);
+    ValueTask<Response<UserDto>> LoginAsync(string username, string password);
+    ValueTask<Response<List<UserDto>>> GetAllAsync();
 }

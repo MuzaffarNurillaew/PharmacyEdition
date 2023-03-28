@@ -55,3 +55,7 @@ await ur.InsertAsync(new User()
     Phone = "234",
     Password = "password"
 });
+
+var res = await ur.SelectAsync(u=> true);
+
+Console.WriteLine(res.FirstName);
