@@ -16,7 +16,7 @@ namespace PharmacyEditon.Data.Repositories
                 predicate = x => true;
             }
 
-            var entityToDelete = this.context.CreditCards.ToList().Where(x => predicate(x)).ToList();
+            var entityToDelete = this.context.CreditCards.Where(x => predicate(x)).ToList();
 
             if (entityToDelete is null)
             {
