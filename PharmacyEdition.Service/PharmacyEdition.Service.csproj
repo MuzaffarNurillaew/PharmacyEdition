@@ -11,4 +11,8 @@
     <ProjectReference Include="..\PharmacyEditon.Data\PharmacyEditon.Data.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Extensions\" />
+  </ItemGroup>
+
 </Project>
