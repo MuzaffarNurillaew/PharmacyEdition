@@ -42,6 +42,7 @@
 
 
 using PharmacyEdition.Domain.Entities;
+using PharmacyEditon.Data.AppDbContext;
 using PharmacyEditon.Data.IRepositories;
 using PharmacyEditon.Data.Repositories;
 
