@@ -1,12 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using PharmacyEdition.Domain.Entities;
 
 namespace PharmacyEditon.Data.IRepositories
 {
-    internal class IPaymentRepository
+    public interface IPaymentRepository
     {
+        Task<Payment> InsertAsync(Payment entity);
+        Task<Payment> UpdateAsync(long id, Payment entity);
+        Task<bool> DeleteAsync(Predicate<Payment> predicate);
+        Task<Payment> SelectAsync(Predicate<Payment> predicate = null);
+        List<Payment> SelectAllAsync(Predicate<Payment> predicate = null);
     }
 }

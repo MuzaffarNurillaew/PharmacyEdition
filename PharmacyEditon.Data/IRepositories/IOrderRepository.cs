@@ -1,12 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using PharmacyEdition.Domain.Entities;
 
 namespace PharmacyEditon.Data.IRepositories
 {
-    internal class IOrderRepository
+    public interface IOrderRepository
     {
+        Task<Order> InsertAsync(Order entity);
+        Task<Order> UpdateAsync(long id, Order entity);
+        Task<bool> DeleteAsync(Predicate<Order> predicate);
+        Task<Order> SelectAsync(Predicate<Order> predicate = null);
+        List<Order> SelectAllAsync(Predicate<Order> predicate = null);
     }
 }

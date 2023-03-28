@@ -1,12 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using PharmacyEdition.Domain.Entities;
 
 namespace PharmacyEditon.Data.IRepositories
 {
-    internal class ICreditCardRepository
+    public interface ICreditCardRepository
     {
+        Task<CreditCard> InsertAsync(CreditCard entity);
+        Task<CreditCard> UpdateAsync(long id, CreditCard entity);
+        Task<bool> DeleteAsync(Predicate<CreditCard> predicate);
+        Task<CreditCard> SelectAsync(Predicate<CreditCard> predicate = null);
+        List<CreditCard> SelectAllAsync(Predicate<CreditCard> predicate = null);
     }
 }
