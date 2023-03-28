@@ -1,4 +1,10 @@
-﻿//// See https://aka.ms/new-console-template for more information
+﻿using PharmacyEdition.Domain.Entities;
+using PharmacyEdition.Service.DTOs;
+using PharmacyEdition.Service.Services;
+using PharmacyEditon.Data.AppDbContext;
+using PharmacyEditon.Data.IRepositories;
+using PharmacyEditon.Data.Repositories;
+//// See https://aka.ms/new-console-template for more information
 
 //using PharmacyEdition.Data.IRepositories;
 //using PharmacyEdition.Data.Repositories;
@@ -41,21 +47,33 @@
 //await orderService.CreateAsync(orderCreationDto);
 
 
-using PharmacyEdition.Domain.Entities;
-using PharmacyEditon.Data.IRepositories;
-using PharmacyEditon.Data.Repositories;
 
-IUserRepository ur = new UserRepository();
+//IUserRepository ur = new UserRepository();
 
-await ur.InsertAsync(new User()
-{
-    Age = 18,
-    FirstName = "Muzaffar",
-    LastName = "Nurillayev",
-    Phone = "234",
-    Password = "password"
-});
+//await ur.InsertAsync(new User()
+//{
+//    Age = 18,
+//    FirstName = "Muzaffar",
+//    LastName = "Nurillayev",
+//    Phone = "234",
+//    Password = "password"
+//});
 
-var res = await ur.SelectAsync(u=> true);
+//var res = await ur.SelectAsync(u=> true);
 
-Console.WriteLine(res.FirstName);
+//Console.WriteLine(res.FirstName);
+
+var ur = new UserService();
+
+//var res = await ur.AddAsync(new UserCreationDto()
+//{
+//    Age = 20,
+//    FirstName = "Abdulloh",
+//    LastName = "Axmadjonov",
+//    Phone = "987",
+//    Password = "notpassword"
+//});
+
+//var res2 = await ur.GetByIdAsync(res.Value.Id);
+var res2 = await ur.LoginAsync(phone: "987", password: "notpassword");
+Console.WriteLine(res2.Value?.FirstName);
