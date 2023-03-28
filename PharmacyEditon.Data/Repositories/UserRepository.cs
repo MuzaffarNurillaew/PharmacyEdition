@@ -1,12 +1,64 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Microsoft.EntityFrameworkCore;
+using PharmacyEdition.Domain.Entities;
+using PharmacyEditon.Data.AppDbContext;
+using PharmacyEditon.Data.IRepositories;
 
 namespace PharmacyEditon.Data.Repositories
 {
-    internal class UserRepository
+    public class UserRepository : IUserRepository
     {
+        private readonly PharmacyDbContext context = new PharmacyDbContext();
+        public async Task<bool> DeleteAsync(Predicate<User> predicate)
+        {
+            if (predicate == null)
+            {
+                predicate = x => true;
+            }
+
+            var entityToDelete = this.context.Users.Where(x => predicate(x)).ToList();
+
+            if (entityToDelete is null)
+            {
+                return false;
+            }
+
+            context.Users.RemoveRange(entityToDelete);
+            await context.SaveChangesAsync();
+            return true;
+        }
+
+        public async Task<User> InsertAsync(User entity)
+        {
+            var insertedEntity = await context.Users.AddAsync(entity);
+            await context.SaveChangesAsync();
+
+            return insertedEntity.Entity;
+        }
+
+        public List<User> SelectAllAsync(Predicate<User> predicate = null)
+        {
+            if (predicate == null)
+            {
+                predicate = x => true;
+            }
+            return this.context.Users.Where(x => predicate(x)).ToList();
+        }
+
+        public async Task<User> SelectAsync(Predicate<User> predicate = null)
+        {
+            if (predicate is null)
+            {
+                predicate = x => true;
+            }
+            return await context.Users.FirstOrDefaultAsync(x => predicate(x));
+        }
+
+        public async Task<User> UpdateAsync(long id, User entity)
+        {
+            var updatedEntity = context.Users.Update(entity);
+            await context.SaveChangesAsync();
+
+            return updatedEntity.Entity;
+        }
     }
 }
