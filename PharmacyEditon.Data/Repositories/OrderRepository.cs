@@ -15,7 +15,7 @@ namespace PharmacyEditon.Data.Repositories
                 predicate = x => true;
             }
 
-            var entityToDelete = this.context.Orders.Where(x => predicate(x)).ToList();
+            var entityToDelete = this.context.Orders.ToList().Where(x => predicate(x)).ToList();
 
             if (entityToDelete is null)
             {
@@ -41,16 +41,16 @@ namespace PharmacyEditon.Data.Repositories
             {
                 predicate = x => true;
             }
-            return this.context.Orders.Where(x => predicate(x)).ToList();
+            return this.context.Orders.ToList().Where(x => predicate(x)).ToList();
         }
 
-        public async Task<Order> SelectAsync(Predicate<Order> predicate = null)
+        public Order SelectAsync(Predicate<Order> predicate = null)
         {
             if (predicate is null)
             {
                 predicate = x => true;
             }
-            return await context.Orders.FirstOrDefaultAsync(x => predicate(x));
+            return context.Orders.ToList().FirstOrDefault(x => predicate(x));
         }
 
         public async Task<Order> UpdateAsync(long id, Order entity)

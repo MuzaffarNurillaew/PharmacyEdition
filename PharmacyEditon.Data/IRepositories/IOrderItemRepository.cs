@@ -7,7 +7,7 @@ namespace PharmacyEditon.Data.IRepositories
         Task<OrderItem> InsertAsync(OrderItem entity);
         Task<OrderItem> UpdateAsync(long id, OrderItem entity);
         Task<bool> DeleteAsync(Predicate<OrderItem> predicate);
-        Task<OrderItem> SelectAsync(Predicate<OrderItem> predicate = null);
+        OrderItem SelectAsync(Predicate<OrderItem> predicate = null);
         List<OrderItem> SelectAllAsync(Predicate<OrderItem> predicate = null);
     }
 }

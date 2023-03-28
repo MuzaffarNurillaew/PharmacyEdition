@@ -16,7 +16,7 @@ namespace PharmacyEditon.Data.Repositories
                 predicate = x => true;
             }
 
-            var entityToDelete = this.context.CreditCards.Where(x => predicate(x)).ToList();
+            var entityToDelete = this.context.CreditCards.ToList().Where(x => predicate(x)).ToList();
 
             if (entityToDelete is null)
             {
@@ -42,16 +42,16 @@ namespace PharmacyEditon.Data.Repositories
             {
                 predicate = x => true;
             }
-            return this.context.CreditCards.Where(x => predicate(x)).ToList();
+            return this.context.CreditCards.ToList().Where(x => predicate(x)).ToList();
         }
 
-        public async Task<CreditCard> SelectAsync(Predicate<CreditCard> predicate = null)
+        public CreditCard SelectAsync(Predicate<CreditCard> predicate = null)
         {
             if (predicate is null)
             {
                 predicate = x => true;
             }
-            return await context.CreditCards.FirstOrDefaultAsync(x => predicate(x));
+            return context.CreditCards.ToList().FirstOrDefault(x => predicate(x));
         }
 
         public async Task<CreditCard> UpdateAsync(long id, CreditCard entity)
