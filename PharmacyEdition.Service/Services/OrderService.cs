@@ -1,170 +1,189 @@
-﻿//using PharmacyEdition.Data.IRepositories;
-//using PharmacyEdition.Data.Repositories;
-//using PharmacyEdition.Domain.Entities;
-//using PharmacyEdition.Domain.Enums;
-//using PharmacyEdition.Service.DTOs;
-//using PharmacyEdition.Service.Helpers;
-//using PharmacyEdition.Service.Interfaces;
+﻿using PharmacyEdition.Domain.Entities;
+using PharmacyEdition.Domain.Enums;
+using PharmacyEdition.Models;
+using PharmacyEdition.Service.DTOs;
+using PharmacyEdition.Service.Helpers;
+using PharmacyEdition.Service.Interfaces;
+using PharmacyEditon.Data.IRepositories;
+using PharmacyEditon.Data.Repositories;
+using System.Collections.Generic;
 
-//namespace PharmacyEdition.Service.Services;
+namespace PharmacyEdition.Service.Services;
 
-//public class OrderService : IOrderService
-//{
-//    private readonly GenericRepository<Order> genericRepository = new GenericRepository<Order>();
-//    private readonly IPaymentService paymentService = new PaymentService();
+public class OrderService : IOrderService
+{
+    private IOrderRepository orderRepository = new OrderRepository();
+    private IOrderItemService orderItemService = new OrderItemService();
+    private IMedicineService medicineService = new MedicineService();
+    private IPaymentService paymentService = new PaymentService();
 
-//    public async Task<Response<Order>> CreateAsync(OrderCreationDto order)
-//    {
-//        // Checking that there are enough medicines or they exist
-//        foreach (var med in order.Medicines)
-//        {
-//            var ourMed = (await medicineService.GetByIdAsync(med.Id)).Value;
+    public async ValueTask<Response<Order>> AddAsync(OrderCreationDto model)
+    {
+        var payment = (await paymentService.AddAsync(model.Payment)).Value;
 
-//            // Checking for existence of medicine
-//            if (ourMed is null)
-//                return new Response<Order>
-//                {
-//                    StatusCode = 409,
-//                    Message = "Some of these medicines does not exist",
-//                    Value = null
-//                };
+        foreach (var orderItem in model.OrderItems)
+        {
+            var medicine = (await medicineService.GetByIdAsync(orderItem.MedicineId)).Value;
 
-//            // Checking does the amount of medicine enought
-//            if (ourMed.Count < med.Count)
-//                return new Response<Order>
-//                {
-//                    StatusCode = 410,
-//                    Message = "Some of these medicine does not enough",
-//                    Value = null
-//                };
-//        }
+            if (medicine is null)
+                return new Response<Order>
+                {
+                    StatusCode = 404,
+                    Message = "Medicine is not found"
+                };
 
-//        // Decreasing count of all medicines
-//        foreach (var med in order.Medicines)
-//        {
-//            var ourMed = (await medicineService.GetByIdAsync(med.Id)).Value;
+            if (medicine.Count < orderItem.Count)
+                return new Response<Order>
+                {
+                    StatusCode = 407,
+                    Message = "Medicine is not enough"
+                };
+        }
 
-//            var mappedMed = new MedicineCreationDto
-//            {
-//                // Decreasing the count
-//                Count = ourMed.Count - med.Count,
-//                Description = ourMed.Description,
-//                Name = ourMed.Name,
-//                Price = ourMed.Price
-//            };
-//            await medicineService.UpdateAsync(ourMed.Id, mappedMed);
-//        }
-    
-//        var paymentResult = await paymentService.CreateAsync(order.Payment);
+        var orderItems = new List<OrderItem>();
 
-//        if (paymentResult.Value.IsPaid)
-//        {
-//            var mappedOrder = new Order()
-//            {
-//                Medicines = order.Medicines,
-//                Payment = paymentResult.Value,
-//                Status = StatusType.Pending
-//            };
-//            var orderResult = await genericRepository.CreateAsync(mappedOrder);
+        foreach (var orderItem in model.OrderItems)
+        {
+            var createdItemResponse = await orderItemService.AddAsync(orderItem);
 
-//            return new Response<Order>()
-//            {
-//                StatusCode = 200,
-//                Message = "Success",
-//                Value = orderResult
-//            };
-//        }
+            orderItems.Add(createdItemResponse.Value);
+        }
 
-//        return new Response<Order>()
-//        {
-//            StatusCode = 402,
-//            Message = "Payment is not valid",
-//            Value = null
-//        };
-//    }
+        var mappedEntity = new Order
+        {
+            CreatedAt = DateTime.UtcNow,
+            PatmentId = payment.Id,
+            Payment = payment,
+            Status = StatusType.Pending,
+            UserId = model.UserId,
+            OrderItems = orderItems,
+        };
 
-//    public async Task<Response<List<Order>>> GetAllAsync()
-//    {
-//        var orders = await this.genericRepository.GetAllAsync();
-//        return new Response<List<Order>>()
-//        {
-//            StatusCode = 200,
-//            Message = "Success",
-//            Value = orders
-//        };
-//    }
+        var insertedEntity = await orderRepository.InsertAsync(mappedEntity);
 
-//    public async Task<Response<Order>> GetByIdAsync(long id)
-//    {
-//        var order = await this.genericRepository.GetByIdAsync(id);
-//        if(order is null)
-//            return new Response<Order>()
-//            {
-//                StatusCode = 404,
-//                Message = "Success",
-//                Value = null
-//            };
+        return new Response<Order>
+        {
+            StatusCode = 200,
+            Message = "Success",
+            Value = insertedEntity
+        };
+    }
 
-//        return new Response<Order>()
-//        {
-//            StatusCode = 200,
-//            Message = "Success",
-//            Value = order
-//        };
-//    }
+    public async ValueTask<Response<bool>> DeleteAsync(long id)
+    {
+        var existingEntity = orderRepository.SelectAsync(u => u.Id == id);
 
-//    public async Task<Response<Order>> UpdateAsync(long id, OrderCreationDto order)
-//    {
-//        var model = await this.genericRepository.GetByIdAsync(id);
-//        if (model is null)
-//            return new Response<Order>()
-//            {
-//                StatusCode = 404,
-//                Message = "Success",
-//                Value = null
-//            };
-//        var mappedPayment = new Payment()
-//        {
-//            OrderId = order.Payment.OrderId,
-//            Type = order.Payment.Type,
-//            IsPaid = order.Payment.IsPaid
-//        };
-//        var mappedOrder = new Order()
-//        {
-//            Medicines = order.Medicines,
-//            Payment = mappedPayment,
-//            Status = model.Status,
-//        };
+        if (existingEntity is null)
+            return new Response<bool>
+            {
+                StatusCode = 404,
+                Message = "Not found",
+                Value = false
+            };
 
-//        var orderResult = await this.genericRepository.UpdateAsync(id, mappedOrder);
-//        return new Response<Order>()
-//        {
-//            StatusCode = 200,
-//            Message = "Success",
-//            Value = orderResult
-//        };
-//    }
+        await orderRepository.DeleteAsync(u => u.Id == id);
 
-//    public async Task<Response<Order>> ChangeStatus(long id, StatusType status)
-//    {
-//        var order = await genericRepository.GetByIdAsync(id);
-//        if(order is not null)
-//        {
-//            order.Status = status;
-//            var orderResult = await genericRepository.UpdateAsync(id, order);
-//            return new Response<Order>()
-//            {
-//                StatusCode = 200,
-//                Message = "Success",
-//                Value = orderResult
-//            };
-//        }
+        return new Response<bool>
+        {
+            StatusCode = 200,
+            Message = "Success",
+            Value = true
+        };
+    }
 
-//        return new Response<Order>()
-//        {
-//            StatusCode = 404,
-//            Message = "Order is not found",
-//            Value = null
-//        };
-//    }
-//}
+    public async ValueTask<Response<List<Order>>> GetAllAsync()
+    {
+        var entities = orderRepository.SelectAllAsync().ToList();
+
+        return new Response<List<Order>>
+        {
+            StatusCode = 200,
+            Message = "Success",
+            Value = entities
+        };
+    }
+
+    public async ValueTask<Response<Order>> GetByIdAsync(long id)
+    {
+        var entity = orderRepository.SelectAsync(u => u.Id == id);
+
+        if (entity is null)
+            return new Response<Order>
+            {
+                StatusCode = 404,
+                Message = "Not found"
+            };
+
+        return new Response<Order>
+        {
+            StatusCode = 200,
+            Message = "Success",
+            Value = entity
+        };
+    }
+
+    public async ValueTask<Response<Order>> UpdateAsync(long id, OrderCreationDto model)
+    {
+        var existedEntity = orderRepository.SelectAsync(u => u.Id == id);
+
+        if (existedEntity is null)
+            return new Response<Order>
+            {
+                StatusCode = 404,
+                Message = "Not found"
+            };
+        if (model.OrderItems is not null)
+        {
+            foreach (var orderItem in model.OrderItems)
+            {
+                var medicine = (await medicineService.GetByIdAsync(orderItem.MedicineId)).Value;
+
+                if (medicine is null)
+                    return new Response<Order>
+                    {
+                        StatusCode = 404,
+                        Message = "Medicine is not found"
+                    };
+
+                if (medicine.Count < orderItem.Count)
+                    return new Response<Order>
+                    {
+                        StatusCode = 407,
+                        Message = "Medicine is not enough"
+                    };
+            }
+        }
+
+        if (model.Payment is not null)
+        {
+            var payment = (await paymentService.AddAsync(model.Payment)).Value;
+            existedEntity.Payment = payment;
+            existedEntity.PatmentId = payment.Id;
+        }
+
+        if (model.OrderItems is not null)
+        {
+            var orderItems = new List<OrderItem>();
+
+            foreach (var orderItem in model.OrderItems)
+            {
+                var createdItemResponse = await orderItemService.AddAsync(orderItem);
+
+                orderItems.Add(createdItemResponse.Value);
+            }
+            existedEntity.OrderItems = orderItems;
+        }
+
+        existedEntity.UpdatedAt = DateTime.UtcNow;
+        existedEntity.UserId = model.UserId;
+
+        var updatedEntity = await orderRepository.UpdateAsync(existedEntity.Id, existedEntity);
+
+        return new Response<Order>
+        {
+            StatusCode = 200,
+            Message = "Success",
+            Value = updatedEntity
+        };
+    }
+}

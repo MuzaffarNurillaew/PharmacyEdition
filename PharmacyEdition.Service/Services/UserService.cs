@@ -56,7 +56,7 @@ public class UserService : IUserService
 
     public async ValueTask<Response<bool>> DeleteAsync(long id)
     {
-        var existingEntity = await userRepository.SelectAsync(u => u.Id == id);
+        var existingEntity = userRepository.SelectAsync(u => u.Id == id);
 
         if (existingEntity is null)
             return new Response<bool>
@@ -105,7 +105,7 @@ public class UserService : IUserService
 
     public async ValueTask<Response<UserDto>> GetByIdAsync(long id)
     {
-        var entity = await userRepository.SelectAsync(u => u.Id == id);
+        var entity = userRepository.SelectAsync(u => u.Id == id);
 
         if (entity is null)
             return new Response<UserDto>
@@ -166,7 +166,7 @@ public class UserService : IUserService
 
     public async ValueTask<Response<UserDto>> UpdateAsync(long id, UserCreationDto model)
     {
-        var existedEntity = await userRepository.SelectAsync(u=> u.Id == id);
+        var existedEntity = userRepository.SelectAsync(u=> u.Id == id);
 
         if (existedEntity is null)
             return new Response<UserDto>

@@ -6,9 +6,9 @@ namespace PharmacyEdition.Service.Interfaces;
 
 public interface IPaymentService
 {
-    Task<Response<Payment>> CreateAsync(PaymentCreationDto medicine);
-    Task<Response<Payment>> UpdateAsync(long id, PaymentCreationDto medicine);
-    Task<Response<bool>> DeleteAsync(long id);
-    Task<Response<Payment>> GetByIdAsync(long id);
-    Task<Response<List<Payment>>> GetAllAsync();
+    ValueTask<Response<Payment>> AddAsync(PaymentCreationDto model);
+    ValueTask<Response<bool>> DeleteAsync(long id);
+    ValueTask<Response<Payment>> UpdateAsync(long id, PaymentCreationDto model);
+    ValueTask<Response<Payment>> GetByIdAsync(long id);
+    ValueTask<Response<List<Payment>>> GetAllAsync();
 }

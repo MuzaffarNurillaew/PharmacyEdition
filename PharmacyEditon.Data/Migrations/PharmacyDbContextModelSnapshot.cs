@@ -39,13 +39,15 @@ namespace PharmacyEditon.Data.Migrations
                     b.Property<DateTime>("Expiration")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("HolderName")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<long>("UserId")
+                        .HasColumnType("bigint");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("CreditCards");
                 });
@@ -61,13 +63,21 @@ namespace PharmacyEditon.Data.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<long>("PatmentId")
+                        .HasColumnType("bigint");
+
                     b.Property<byte>("Status")
                         .HasColumnType("tinyint");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<long>("UserId")
+                        .HasColumnType("bigint");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("Orders");
                 });
@@ -135,9 +145,7 @@ namespace PharmacyEditon.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CreditCardId")
-                        .IsUnique()
-                        .HasFilter("[CreditCardId] IS NOT NULL");
+                    b.HasIndex("CreditCardId");
 
                     b.HasIndex("OrderId")
                         .IsUnique();
@@ -187,8 +195,8 @@ namespace PharmacyEditon.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"), 1L, 1);
 
-                    b.Property<int>("Count")
-                        .HasColumnType("int");
+                    b.Property<long>("Count")
+                        .HasColumnType("bigint");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
@@ -213,6 +221,28 @@ namespace PharmacyEditon.Data.Migrations
                     b.ToTable("Medicines");
                 });
 
+            modelBuilder.Entity("PharmacyEdition.Domain.Entities.CreditCard", b =>
+                {
+                    b.HasOne("PharmacyEdition.Domain.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("PharmacyEdition.Domain.Entities.Order", b =>
+                {
+                    b.HasOne("PharmacyEdition.Domain.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("PharmacyEdition.Domain.Entities.OrderItem", b =>
                 {
                     b.HasOne("PharmacyEdition.Models.Medicine", "Medicine")
@@ -235,8 +265,8 @@ namespace PharmacyEditon.Data.Migrations
             modelBuilder.Entity("PharmacyEdition.Domain.Entities.Payment", b =>
                 {
                     b.HasOne("PharmacyEdition.Domain.Entities.CreditCard", "CreditCard")
-                        .WithOne("Payment")
-                        .HasForeignKey("PharmacyEdition.Domain.Entities.Payment", "CreditCardId");
+                        .WithMany("Payments")
+                        .HasForeignKey("CreditCardId");
 
                     b.HasOne("PharmacyEdition.Domain.Entities.Order", "Order")
                         .WithOne("Payment")
@@ -251,7 +281,7 @@ namespace PharmacyEditon.Data.Migrations
 
             modelBuilder.Entity("PharmacyEdition.Domain.Entities.CreditCard", b =>
                 {
-                    b.Navigation("Payment");
+                    b.Navigation("Payments");
                 });
 
             modelBuilder.Entity("PharmacyEdition.Domain.Entities.Order", b =>

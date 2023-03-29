@@ -8,8 +8,9 @@ namespace PharmacyEditon.Data.AppDbContext
     {
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseSqlServer("Server=(localdb)\\MSSQLLocalDB; Database=PharmacyEdition;");
+            optionsBuilder.UseSqlServer("Server=(localdb)\\MSSQLLocalDB; Database=PharmacyEdition; Trusted_Connection=True;");
         }
+        
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Order>()
@@ -23,10 +24,9 @@ namespace PharmacyEditon.Data.AppDbContext
                 .HasForeignKey(o => o.OrderId);
 
             modelBuilder.Entity<Payment>()
-                .HasOne(p => p.CreditCard)
-                .WithOne(c => c.Payment)
-                .HasForeignKey<Payment>(p => p.CreditCardId);
+                .HasOne(p => p.CreditCard);
         }
+
         public DbSet<Medicine> Medicines { get; set; }
         public DbSet<Order> Orders { get; set; }
         public DbSet<User> Users { get; set; }
