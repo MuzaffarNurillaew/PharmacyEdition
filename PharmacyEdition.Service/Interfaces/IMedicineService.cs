@@ -1,15 +1,15 @@
-﻿using PharmacyEdition.Models;
+﻿using PharmacyEdition.Domain.Entities;
+using PharmacyEdition.Models;
 using PharmacyEdition.Service.DTOs;
 using PharmacyEdition.Service.Helpers;
 
-namespace PharmacyEdition.Service.Interfaces
+namespace PharmacyEdition.Service.Interfaces;
+
+public interface IMedicineService
 {
-    public interface IMedicineService
-    {
-        Task<Response<Medicine>> CreateAsync(MedicineCreationDto medicine);
-        Task<Response<Medicine>> UpdateAsync(long id, MedicineCreationDto medicine);
-        Task<Response<bool>> DeleteAsync(long id);
-        Task<Response<Medicine>> GetByIdAsync(long id);
-        Task<Response<List<Medicine>>> GetAllAsync();
-    }
+    ValueTask<Response<Medicine>> AddAsync(MedicineCreationDto model);
+    ValueTask<Response<bool>> DeleteAsync(long id);
+    ValueTask<Response<Medicine>> UpdateAsync(long id, MedicineCreationDto model);
+    ValueTask<Response<Medicine>> GetByIdAsync(long id);
+    ValueTask<Response<List<Medicine>>> GetAllAsync();
 }

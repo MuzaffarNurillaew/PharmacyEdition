@@ -1,12 +1,13 @@
 ﻿using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using PharmacyEdition.Domain.Entities;
+using PharmacyEdition.Models;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace PharmacyEdition.Service.DTOs;
 
-public class MedicineCreationDto
+public class OrderItemCreationDto
 {
-    public string Name { get; set; }
+    public long MedicineId { get; set; }
+    public long OrderId { get; set; }
     public long Count { get; set; }
-    public decimal Price { get; set; }
-    public string Description { get; set; }
 }

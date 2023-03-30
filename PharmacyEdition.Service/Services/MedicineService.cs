@@ -1,67 +1,63 @@
-﻿using PharmacyEdition.Data.IRepositories;
-using PharmacyEdition.Data.Repositories;
+﻿using PharmacyEdition.Domain.Entities;
 using PharmacyEdition.Models;
 using PharmacyEdition.Service.DTOs;
 using PharmacyEdition.Service.Helpers;
 using PharmacyEdition.Service.Interfaces;
+using PharmacyEditon.Data.IRepositories;
+using PharmacyEditon.Data.Repositories;
 
 namespace PharmacyEdition.Service.Services;
 
 public class MedicineService : IMedicineService
 {
-    private readonly GenericRepository<Medicine> genericRepository = new GenericRepository<Medicine>();
-    //public MedicineService(GenericRepository<Medicine> geniricRepository)
-    //{
-    //    this.genericRepository = genericRepository;
-    //}
+    private IMedicineRepository medicineRepository = new MedicineRepository();
 
-    public async Task<Response<Medicine>> CreateAsync(MedicineCreationDto medicine)
+    public async ValueTask<Response<Medicine>> AddAsync(MedicineCreationDto model)
     {
-        var models = await this.genericRepository.GetAllAsync();
-        var model = models.FirstOrDefault(x => x.Name == medicine.Name);
-        if (model is not null)
-        {
-            model.Count += medicine.Count;
-            await genericRepository.UpdateAsync(model.Id, model);
+        var existingEntity = medicineRepository.SelectAllAsync()
+            .Where(u => u.Name == model.Name).FirstOrDefault();
 
-            return new Response<Medicine>()
+        if (existingEntity is not null)
+            return new Response<Medicine>
             {
-                StatusCode = 403,
-                Message = "Medicine already exists",
-                Value = null
+                StatusCode = 400,
+                Message = "The medicine with this name exists"
             };
-        }
 
-        var mappedModel = new Medicine()
+        var mappedEntity = new Medicine
         {
-            Name = medicine.Name,
-            Description = medicine.Description,
-            Count = medicine.Count,
-            Price = medicine.Price,
+            CreatedAt = DateTime.UtcNow,
+            Count = model.Count,
+            Description = model.Description,
+            Name = model.Name,
+            Price = model.Price
         };
-        var result = await this.genericRepository.CreateAsync(mappedModel);
 
-        return new Response<Medicine>()
+        var insertedEntity = await medicineRepository.InsertAsync(mappedEntity);
+
+        return new Response<Medicine>
         {
             StatusCode = 200,
             Message = "Success",
-            Value = result
+            Value = insertedEntity
         };
     }
 
-    public async Task<Response<bool>> DeleteAsync(long id)
+    public async ValueTask<Response<bool>> DeleteAsync(long id)
     {
-        var model = await this.genericRepository.GetByIdAsync(id);
-        if (model is null)
-            return new Response<bool>()
+        var existingEntity = medicineRepository.SelectAsync(u => u.Id == id);
+
+        if (existingEntity is null)
+            return new Response<bool>
             {
                 StatusCode = 404,
-                Message = "Medicine is not found",
+                Message = "Not found",
                 Value = false
             };
 
-        await this.genericRepository.DeleteAsync(id);
-        return new Response<bool>()
+        await medicineRepository.DeleteAsync(u => u.Id == id);
+
+        return new Response<bool>
         {
             StatusCode = 200,
             Message = "Success",
@@ -69,61 +65,61 @@ public class MedicineService : IMedicineService
         };
     }
 
-    public async Task<Response<List<Medicine>>> GetAllAsync()
+    public async ValueTask<Response<List<Medicine>>> GetAllAsync()
     {
-        var result = await this.genericRepository.GetAllAsync();
-        return new Response<List<Medicine>>()
+        var entities = medicineRepository.SelectAllAsync().ToList();
+
+        return new Response<List<Medicine>>
         {
             StatusCode = 200,
             Message = "Success",
-            Value = result
+            Value = entities
         };
     }
 
-    public async Task<Response<Medicine>> GetByIdAsync(long id)
+    public async ValueTask<Response<Medicine>> GetByIdAsync(long id)
     {
-        var model = await this.genericRepository.GetByIdAsync(id);
-        if (model is null)
-            return new Response<Medicine>()
+        var entity = medicineRepository.SelectAsync(u => u.Id == id);
+
+        if (entity is null)
+            return new Response<Medicine>
             {
                 StatusCode = 404,
-                Message = "Medicine is not found",
-                Value = null
+                Message = "Not found"
             };
 
-        return new Response<Medicine>()
+        return new Response<Medicine>
         {
             StatusCode = 200,
             Message = "Success",
-            Value = model
+            Value = entity
         };
     }
 
-    public async Task<Response<Medicine>> UpdateAsync(long id, MedicineCreationDto medicine)
+    public async ValueTask<Response<Medicine>> UpdateAsync(long id, MedicineCreationDto model)
     {
-        var model = await this.genericRepository.GetByIdAsync(id);
-        if (model is null)
-            return new Response<Medicine>()
+        var existedEntity = medicineRepository.SelectAsync(u => u.Id == id);
+
+        if (existedEntity is null)
+            return new Response<Medicine>
             {
                 StatusCode = 404,
-                Message = "Medicine is not found",
-                Value = null
+                Message = "Not found"
             };
 
-        var mappedModel = new Medicine()
-        {
-            Name = medicine.Name,
-            Description = medicine.Description,
-            Count = medicine.Count,
-            Price = medicine.Price,
-        };
+        existedEntity.UpdatedAt = DateTime.UtcNow;
+        existedEntity.Price = model.Price;
+        existedEntity.Count = model.Count;
+        existedEntity.Description = model.Description;
+        existedEntity.Name = model.Name;
 
-        var result = await this.genericRepository.UpdateAsync(id, mappedModel);
-        return new Response<Medicine>()
+        var updatedEntity = await medicineRepository.UpdateAsync(existedEntity.Id, existedEntity);
+
+        return new Response<Medicine>
         {
             StatusCode = 200,
             Message = "Success",
-            Value = result
+            Value = updatedEntity
         };
     }
 }
