@@ -7,7 +7,7 @@ namespace PharmacyEditon.Data.IRepositories
         Task<Payment> InsertAsync(Payment entity);
         Task<Payment> UpdateAsync(long id, Payment entity);
         Task<bool> DeleteAsync(Predicate<Payment> predicate);
-        Task<Payment> SelectAsync(Predicate<Payment> predicate = null);
+        Payment SelectAsync(Predicate<Payment> predicate = null);
         List<Payment> SelectAllAsync(Predicate<Payment> predicate = null);
     }
 }

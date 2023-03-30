@@ -44,7 +44,7 @@ namespace PharmacyEditon.Data.Repositories
             return this.context.Users.ToList().Where(x => predicate(x)).ToList();
         }
 
-        public async Task<User> SelectAsync(Predicate<User> predicate = null)
+        public User SelectAsync(Predicate<User> predicate = null)
         {
             if (predicate is null)
             {
