@@ -1,0 +1,42 @@
+﻿@using PharmacyEdition.Service.DTOs
+@model IEnumerable<UserDto>
+
+@{
+    ViewData["Title"] = "Users";
+}
+
+<h1>Users</h1>
+<div>
+    <table class="table table-hover">
+      <thead>
+        <tr>
+          <th scope="col">#</th>
+          <th scope="col">First Name</th>
+          <th scope="col">Last Name</th>
+          <th scope="col">Age</th>
+          <th scope="col">Phone</th>
+          <th scope="col"></th>
+        </tr>
+      </thead>
+      <tbody>
+          @foreach(var item in Model)   
+          {
+            <tr>
+              <td>@item.Id</td>
+              <td>@item.FirstName</td>
+              <td>@item.LastName</td>
+              <td>@item.Age</td>
+              <td>@item.Phone</td>
+              <td>
+                <button type="button" class="btn btn-primary">Edit</button>
+                <button type="button" class="btn btn-danger">Delete</button>
+              </td>
+            </tr>
+          }
+      </tbody>
+    </table>
+</div>
+
+<div class="mt-10">
+    <a asp-page="Create" class="btn btn-danger">Create</a>
+</div>

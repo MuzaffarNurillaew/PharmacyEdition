@@ -1,0 +1,38 @@
+﻿@using PharmacyEdition.Service.DTOs
+@model UserDto
+
+@{
+    ViewData["Title"] = "User Create";
+}
+
+<h1>User Create</h1>
+
+<div>
+	<form asp-controller="Users" asp-action="create" method="post" asp-antiforgery="true" enctype="multipart/form-data">
+		<div class="mb-3">
+			<label>First Name</label>
+			<input type="text" class="form-control form-control-sm" asp-for="FirstName"/>
+		</div>
+		<div class="mb-3">
+			<label>Last Name</label>
+			<input type="text" class="form-control form-control-sm" asp-for="LastName"/>
+		</div>
+		<div class="mb-3">
+			<label>Age</label>
+			<input type="text" class="form-control form-control-sm" asp-for="Age"/>
+		</div>
+		<div class="mb-3">
+			<label>Phone</label>
+			<input type="text" class="form-control form-control-sm" asp-for="Phone"/>
+		</div>
+		<div class="mb-3">
+			<label>Password</label>
+			<input type="password" class="form-control" placeholder="Password" />
+		</div>
+		<div>
+			<button type="submit" asp-page="./Index" class="btn btn-success">Submit</button>
+			<a asp-action="Index" class="btn btn-danger">Back</a>
+		</div>
+	</form>
+</div>
+
